@@ -9,24 +9,26 @@ export const createMovie = async (data :any) => {
     return result.rows[0];
 };
 
-export const updateMovieById = async (id : number , data : any) => {
-    const {title , description} = data;
+export const updateMovieById = async (id : string , data : any) => {
+    const {title , description , poster_url , image} = data;
 
     const result = await pool.query(
         `UPDATE movies 
-        SET title =$1 , description=$2 
-        WHERE id=$3
+        SET title =$1 , description=$2 , poster_url=$3, image=$4
+        WHERE id=$5
         RETURNING *`,
-        [title , description, id]
+        [title , description, poster_url , image , id]
     );
     return result.rows[0];
 };
 
-export const deleteMovieById = async (id : number , data : any) => {
+export const deleteMovieById = async (id:string) => {
     // const {title , description, video , image} = data;
 
+    // console.log("DB DELETE ID : ", id);
+    await pool.query("DELETE FROM watchlist WHERE movie_id=$1", [id]);
     const result = await pool.query(
-        "DELETE FROM movies WHERE id=$1" ,
+        "DELETE FROM movies WHERE id=$1 RETURNING *" ,
         [id]
     );
     return result.rows[0];

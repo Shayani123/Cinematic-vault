@@ -1,5 +1,6 @@
 import { Request } from "express";
 import {Multer} from "multer";
+// import {User} from "@prisma/client";
 
 interface JwtUser {
     id : number;
@@ -12,6 +13,11 @@ declare global {
         interface Request {
             // user? : JwtUser;
             file? : Multer.File;
+            user?:{
+                id: string;
+                email?: string;
+                role?: string;
+            };
         }
     }
 }

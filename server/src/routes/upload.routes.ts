@@ -3,13 +3,15 @@ import { Router , Request, Response } from "express";
 import pool from "../db";
 import multer from "multer";
 import cloudinary from "../utils/cloudinary";
-import { getByMovie } from "../controllers/movie.controller";
+import { deleteMovie, getByMovie, updateByMovie } from "../controllers/movie.controller";
+// import { auth } from "../middleware/auth.middleware";
+import { isAdmin } from "../middleware/admin.middleware";
 
 const router = Router();
 const upload = multer({storage: multer.memoryStorage()});
 
 //post request for Add-movie button
-router.post("/movies" , upload.fields([ 
+router.post("/upload/movies" , upload.fields([ 
     {name: "image", maxCount: 1},
     {name: "video", maxCount:1},
 ]),
@@ -29,14 +31,8 @@ async (req,res) => {
 }
 );
 
-//get movie
-router.get("/all", async(req,res) => {
-    const movies = await pool.query("SELECT * FROM movies");
-    res.json(movies.rows);
-});
-
 //Upload image
-router.post("/image" , upload.single("file"), async(req: Request , res: Response) => {
+router.post("/upload/image" , upload.single("file"), async(req: Request , res: Response) => {
     try {
         if(!req.file) {
             return res.status(400).json({message : "Image not Upload"});
@@ -46,6 +42,7 @@ router.post("/image" , upload.single("file"), async(req: Request , res: Response
             `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
             {folder: "movies/images"}
         );
+        console.log("cloud image url : " , result.secure_url);
         res.json({
             message: "Image upload successfully",
             imageurl : result.secure_url,
@@ -58,7 +55,7 @@ router.post("/image" , upload.single("file"), async(req: Request , res: Response
 });
 
 //Upload video
-router.post("/video" , upload.single("file"), async(req,res) => {
+router.post("/upload/video" , upload.single("file"), async(req,res) => {
     try {
         if(!req.file) return res.status(400).json({message : "Video not upload"});
     
@@ -99,5 +96,12 @@ router.get("/movie" , async(req,res) => {
 
 
 router.get("/movies/:id" , getByMovie);
+
+//update movie  
+router.put("/movies/:id" ,upload.single("file")  , updateByMovie);
+
+//delete movie
+// router.delete("/movies/:id" , auth , isAdmin, deleteMovie);
+router.delete("/movies/:id"  , deleteMovie);
 
 export default router;

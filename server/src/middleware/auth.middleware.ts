@@ -22,13 +22,7 @@ export const auth = (req : Request  , res : Response , next : NextFunction) => {
             process.env.JWT_SECRET as string
         ) as JwtPayload;
 
-        
-
-        // if(!decoded) {
-        //     return res.status(401).json({
-        //         message : "unauthorized access"
-        //     });
-        // }
+        (req as any).user = decoded;
 
         // req.userId = decoded.id;
         next();

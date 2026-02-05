@@ -3,9 +3,9 @@ import { Request , Response } from "express";
 
 //Add new comment 
 export const addComment = async(req : any , res : Response) => {
-    const userId = req.user?.id;
-    const movieId = Number(req.params.id);
+    const { movieId } = req.params;
     const {comment} = req.body;
+    const userId = req.user.id;  
 
     if(!comment) {
         return res.status(400).json({message : "Comment required"});
@@ -16,7 +16,9 @@ export const addComment = async(req : any , res : Response) => {
 
 //get comment 
 export const getComment = async(req : any , res : Response) => {
-    const movieId = Number(req.params.id);
-    const comment = await CommentService.getMovieComment(movieId);
+    // const movieId = String(req.params.movieId);
+    const {movieId} = req.params;
+    const comment = await CommentService.getMovieComment(movieId );
+    console.log(comment);
     res.json(comment);
 };

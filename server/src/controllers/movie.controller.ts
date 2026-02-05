@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import * as MovieService from "../services/movie.services"
+import { error } from "node:console";
+import cloudinary from "../utils/cloudinary";
+import { Result } from "pg";
 
 
 
@@ -24,21 +27,42 @@ export const createByMovie = async (req : Request , res : Response) => {
 
 //Admin update movie
 export const updateByMovie = async (req : Request , res:Response) => {
-    const id = Number(req.params.id);
-    const movie = await MovieService.updateMovieById(id , req.body);
+    const id = req.params.id as string;
+    const {title , description , poster_url} = req.body;
+    let imageurl = req.body.image; // old img url
+    console.log("body data: ",req.body);
+    console.log( "file data: ", req.file);
+    
+    if(req.file) {
+        const result = await cloudinary.uploader.upload( 
+            `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`, 
+            {folder:"movies/images"});
+            imageurl = result.secure_url;
+            console.log(imageurl);
+    }
+    
+    const movie = await MovieService.updateMovieById(id , {
+        title , description , poster_url , image: imageurl
+    });
     
     if(!movie) {
         return res.status(404).json({message : "Movie not found"});
-    }
+    } 
     res.json(movie);
 };
 
 //Admin delete movie
 export const deleteMovie = async(req : Request , res : Response) => {
-    const id = Number(req.params.id);
-    await MovieService.deleteMovieById(id , req.body);
-    res.json({message : "Movie Deleted"});
-
+    try {
+        const id = req.params.id as string;
+        console.log("Deleted id : ",id);
+        const deleted = await MovieService.deleteMovieById(id);
+        if(!deleted) return res.status(404).json({error: "Movie not found"});
+        res.json({message : "Movie Deleted" , movie: deleted});
+    } catch (error) {
+        console.error("Delete Error : " ,error );
+        res.status(500).json({error:"Internal Server Error"});
+    }
 };
 
 //All user see all movie

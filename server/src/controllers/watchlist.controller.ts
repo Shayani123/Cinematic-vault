@@ -5,6 +5,7 @@ import * as WatchlistService from "../services/watchlist.services";
 export const addWatchlist = async (req : any , res : Response) => {
     const userId = req.user.id;
     // const movieId = String(req.params.id);
+    console.log(userId);
     const {movieId} = req.body;
     console.log(movieId);
     const movie = await WatchlistService.addToWatchlist(userId , movieId);

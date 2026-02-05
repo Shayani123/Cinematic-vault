@@ -7,6 +7,8 @@ import uploadRoutes from "./routes/upload.routes";
 import movieRoutes from "./routes/movie.routes";
 import watchlistRoutes from "./routes/watchlist.routes";
 import likeRoutes from "./routes/like.routes";
+import commentRoutes from "./routes/comment.routes";
+
 
 dotenv.config();
 
@@ -31,10 +33,11 @@ app.use(express.json());
 app.use("/api/auth" ,authRoutes);
 app.use(express.urlencoded({extended : true}));
 app.use("/uploads" , express.static("src/uploads"));
-app.use("/api/movies", movieRoutes);
+// app.use("/api/movie", movieRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api" , watchlistRoutes);
 app.use("/api" , likeRoutes);
+app.use("/api" , commentRoutes);
 app.get('/' , async(req , res) => {
     try {
         const result = await pool.query('SELECT NOW()');
